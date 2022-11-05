@@ -152,23 +152,32 @@ def index():
       names.append(result[0]+' '+result[1])  # can also be accessed using result[0]
     cursor.close()
 
-  # list=None
-  # for c_id in course_id:
-  #   sections=[]
-  #   cmd="SELECT * FROM course AS c, section_course as sc WHERE c.course_id = sc.course_id AND c.course_id=(:name1)"
-  #   cursor=g.conn.execute(text(cmd), name1=c_id)
-  #   for result in cursor:
-  #     sections.append([[course_id,result['course_name'],result['call_number'],result['section_day'],result['section_time'],result['instructor']]])
-  #   if list is None:
-  #     list=sections
-  #   else:
-  #     newlist=[]
-  #     for l in list:
-  #       hasmatch=false
-  #       for s in sections:
-  #
-  #         for ll in l:
-  #           if
+  list=None
+  for c_id in course_id:
+    sections=[]
+    cmd="SELECT * FROM course AS c, section_course as sc WHERE c.course_id = sc.course_id AND c.course_id=(:name1)"
+    cursor=g.conn.execute(text(cmd), name1=c_id)
+    for result in cursor:
+      sections.append([[c_id,result['course_name'],result['call_number'],result['section_day'],result['section_time'],result['instructor']]])
+    if list is None:
+      list=sections
+    else:
+      newlist=[]
+      for l in list:
+        for s in sections:
+          match=True
+          for ll in l:
+            if check_conflict(s[0][3],s[0][4],ll[3],ll[4]):
+              match=False
+              break
+          if match:
+            new_set=[]
+            for ll in l:
+              new_set.append(ll)
+            new_set.append(s[0])
+            newlist.append(new_set)
+      list=newlist
+
 
 
   #
@@ -198,7 +207,11 @@ def index():
   #     {% endfor %}
   #
   global message
-  context = dict(msg = message,data = names)
+  if list is None:
+    list=[]
+  elif len(list)==0:
+    message="No permutation exist!"
+  context = dict(msg = message,data = names,list=list)
   message=""
   #
   # render_template looks in the templates/ folder for files.
