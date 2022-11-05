@@ -177,6 +177,19 @@ def index():
             new_set.append(s[0])
             newlist.append(new_set)
       list=newlist
+  print(list)
+  list_visulized=[]
+  if list is not None and len(list)>0:
+    for schedule in list:
+      l=[]
+      for section in schedule:
+        sec_dict=dict()
+        sec_dict['course_name']=section[1]
+        sec_dict['section_day']=section[3]
+        sec_dict['section_time']=section[4]
+        l.append(sec_dict)
+      visual=format_schedule(l)
+      list_visulized.append(visual)
 
 
 
@@ -211,7 +224,7 @@ def index():
     list=[]
   elif len(list)==0:
     message="No permutation exist!"
-  context = dict(msg = message,data = names,list=list)
+  context = dict(msg = message,data = names,list=list_visulized)
   message=""
   #
   # render_template looks in the templates/ folder for files.
