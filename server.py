@@ -183,27 +183,39 @@ def parse_time(section_time):
   return (time_slot_start, time_slot_end)
 
 def format_schedule(sections):
+  # longest Course name
+  longest_course_name = 0
+  for section in sections:
+    if section['course_name'] is not None:
+      longest_course_name = max(longest_course_name, len(section['course_name']))
+  div_line = ""
+  for i in range(longest_course_name):
+    div_line += '-'
   # a schedule placeholder
   MondayToFriday = [[], [], [], [], []]
   for i in range(len(MondayToFriday)):
     for half_hour in range(0, 24):
-      MondayToFriday[i].append('----')
+      MondayToFriday[i].append(div_line)
   # mapping from MTWRF to 012345
   MTWRF_mapping = {'M': 0, 'T': 1, 'W': 2, 'R': 3, 'F': 4}
+  # for each section, fill in the either space or class name
   for section in sections:
     if section['section_time'] is None:
       continue
     start_slot, end_slot = parse_time(section['section_time'])
     for weekday in section['section_day']:
       for i in range(start_slot, end_slot):
-        MondayToFriday[MTWRF_mapping[weekday]][i] = 'Have'
+        space_line = section['course_name']
+        for i in range(len(section['course_name']), longest_course_name):
+          space_line += ' '
+        print(i, section)
+        MondayToFriday[MTWRF_mapping[weekday]][i] = space_line
   # string formatting
   for i in range(len(MondayToFriday[0])):
-    time_slot = (str(int((i/2) + 8))) + ":" + "00" + " "
+    time_slot = " | "
     for j in range(len(MondayToFriday)):
-      time_slot += str(MondayToFriday[j][i]) + " "
+      time_slot += str(MondayToFriday[j][i]) + " | "
     print(time_slot)
-    
       
   print(section)
   print(MondayToFriday)
@@ -236,7 +248,6 @@ def catalog():
   cursor = g.conn.execute("SELECT * FROM course AS c, section_course as sc WHERE c.course_id = sc.course_id")
   for result in cursor:
     sections.append(result)
-    break
   cursor.close()
   format_schedule(sections)
   return render_template("catalog.html", **context)
