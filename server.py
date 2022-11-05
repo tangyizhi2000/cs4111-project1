@@ -56,6 +56,7 @@ engine.execute("""CREATE TABLE IF NOT EXISTS test (
 engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
 
 message=""
+course_id=[]
 
 @app.before_request
 def before_request():
@@ -114,11 +115,13 @@ def index():
   #
   # example of a database query
   #
-  cursor = g.conn.execute("SELECT name FROM test")
   names = []
-  for result in cursor:
-    names.append(result['name'])  # can also be accessed using result[0]
-  cursor.close()
+  for c_id in course_id:
+    cmd = 'SELECT * FROM course WHERE course_id=(:name1)'
+    cursor = g.conn.execute(text(cmd), name1=c_id)
+    for result in cursor:
+      names.append(result[0]+' '+result[1])  # can also be accessed using result[0]
+    cursor.close()
 
   #
   # Flask uses Jinja templates, which is an extension to HTML where you can
@@ -179,23 +182,30 @@ def catalog():
   return render_template("catalog.html", **context)
 
 
-# Example of adding new data to the database
+
 @app.route('/add', methods=['POST'])
 def add():
   name = request.form['name']
   print(name)
-  cmd = 'INSERT INTO test(name) VALUES (:name1)'
-  g.conn.execute(text(cmd), name1 = name)
+  cmd = 'SELECT * FROM course WHERE course_id=(:name1)'
+  cursor = g.conn.execute(text(cmd), name1 = name)
+  cname=''
+  for result in cursor:
+    cname=result['course_id']
+    break
   global message
-  message="Successfully added "+name+" to schedule!"
+  if cname=='':
+    message="The course "+name+" does not exist!"
+  else:
+    course_id.append(name)
+    message="Successfully added "+name+" to schedule!"
   return redirect('/')
 
 @app.route('/remove', methods=['POST'])
 def remove():
   name = request.form['name']
-  print(name)
-  cmd = 'DELETE FROM test WHERE name=(:name1)'
-  g.conn.execute(text(cmd), name1 = name)
+  if name in course_id:
+    course_id.remove(name)
   global message
   message="Successfully removed "+name+" from schedule!"
   return redirect('/')
@@ -203,8 +213,7 @@ def remove():
 @app.route('/removeall', methods=['POST'])
 def removeall():
   print("removeall")
-  cmd = 'DELETE FROM test'
-  g.conn.execute(text(cmd))
+  course_id.clear()
   global message
   message="Successfully removed all courses!"
   return redirect('/')
