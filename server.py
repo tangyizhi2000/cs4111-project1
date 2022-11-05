@@ -154,6 +154,52 @@ def index():
   #
   return render_template("index.html", **context)
 
+def parse_time(section_time):
+  section_time = section_time.split('-')
+  start_time = section_time[0][:-2].split(':')
+  end_time = section_time[1][:-2].split(':')
+  start_hour = int(start_time[0]) - 8
+  if start_hour < 0:
+    start_hour += 12
+  start_min = int(start_time[1])
+  end_hour = int(end_time[0]) - 8
+  if end_hour < 0:
+    end_hour += 12
+  end_min = int(end_time[1])
+  time_slot_start = start_hour * 2
+  time_slot_end = end_hour * 2
+  if start_min > 30:
+    time_slot_start += 1
+  if end_min > 0:
+    time_slot_end += 1
+  return (time_slot_start, time_slot_end)
+
+def format_schedule(sections):
+  # a schedule placeholder
+  MondayToFriday = [[], [], [], [], []]
+  for i in range(len(MondayToFriday)):
+    for half_hour in range(0, 24):
+      MondayToFriday[i].append('----')
+  # mapping from MTWRF to 012345
+  MTWRF_mapping = {'M': 0, 'T': 1, 'W': 2, 'R': 3, 'F': 4}
+  for section in sections:
+    if section['section_time'] is None:
+      continue
+    start_slot, end_slot = parse_time(section['section_time'])
+    for weekday in section['section_day']:
+      for i in range(start_slot, end_slot):
+        MondayToFriday[MTWRF_mapping[weekday]][i] = 'Have'
+  # string formatting
+  for i in range(len(MondayToFriday[0])):
+    time_slot = (str(int((i/2) + 8))) + ":" + "00" + " "
+    for j in range(len(MondayToFriday)):
+      time_slot += str(MondayToFriday[j][i]) + " "
+    print(time_slot)
+    
+      
+  print(section)
+  print(MondayToFriday)
+
 #
 # This is an example of a different path.  You can see it at
 #
@@ -170,11 +216,21 @@ def catalog():
   for result in cursor:
     course_key = (result['course_id'], result['course_name'])
     all_courses[course_key].append([result['call_number'], result['section_day'], result['section_time'], result['instructor']])
+    if result['section_time'] is not None:
+      parse_time(result['section_time'])
     print(result)
   cursor.close()
 
   context = dict(data = list(all_courses.items()))
   print(context)
+  # test format_schedule
+  sections = []
+  cursor = g.conn.execute("SELECT * FROM course AS c, section_course as sc WHERE c.course_id = sc.course_id")
+  for result in cursor:
+    sections.append(result)
+    break
+  cursor.close()
+  format_schedule(sections)
   return render_template("catalog.html", **context)
 
 
