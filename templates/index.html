@@ -14,25 +14,31 @@
   <h3>Yizhi Tang, Dongchen Zou</h3>
   <a href="catalog.html" class="button">All Courses</a>
   <form method="POST" action="/add">
-  <p>Add call number of a new course: <input type="text" name="name"> <input type="submit" value="Add"></p>
+  <p>Add name of a new course: <input type="text" name="name"> <input type="submit" value="Add"></p>
   </form>
   <form method="POST" action="/remove">
-  <p>Remove call number of an existing course: <input type="text" name="name"> <input type="submit" value="Remove"></p>
+  <p>Remove name of an existing course: <input type="text" name="name"> <input type="submit" value="Remove"></p>
   </form>
   <form>
   <button type=submit formmethod="post" formaction="/removeall">Remove all courses</button>
   </form>
   <div>
       {{ msg }}
+      <br><br>
   </div>
+
   <div>
     Current sections in schedule:
     {% for n in data %}
     <div>{{n}}</div>
     {% endfor %}
   </div>
+  <br><br>
     <div>
-
+    The Permutations:
+        {% for n in list %}
+    <div>{{n}}</div>
+    {% endfor %}
     </div>
 
 

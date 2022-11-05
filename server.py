@@ -39,6 +39,7 @@ DB_SERVER = "w4111.cisxo09blonu.us-east-1.rds.amazonaws.com"
 DATABASEURI = "postgresql://"+DB_USER+":"+DB_PASSWORD+"@"+DB_SERVER+"/proj1part2"
 
 
+
 #
 # This line creates a database engine that knows how to connect to the URI above
 #
@@ -53,7 +54,7 @@ engine.execute("""CREATE TABLE IF NOT EXISTS test (
 );""")
 engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
 
-
+message=""
 
 @app.before_request
 def before_request():
@@ -144,9 +145,9 @@ def index():
   #     <div>{{n}}</div>
   #     {% endfor %}
   #
-  context = dict(data = names)
-
-
+  global message
+  context = dict(msg = message,data = names)
+  message=""
   #
   # render_template looks in the templates/ folder for files.
   # for example, the below file reads template/index.html
@@ -173,6 +174,8 @@ def add():
   print(name)
   cmd = 'INSERT INTO test(name) VALUES (:name1)'
   g.conn.execute(text(cmd), name1 = name)
+  global message
+  message="Successfully added "+name+" to schedule!"
   return redirect('/')
 
 @app.route('/remove', methods=['POST'])
@@ -181,6 +184,8 @@ def remove():
   print(name)
   cmd = 'DELETE FROM test WHERE name=(:name1)'
   g.conn.execute(text(cmd), name1 = name)
+  global message
+  message="Successfully removed "+name+" from schedule!"
   return redirect('/')
 
 @app.route('/removeall', methods=['POST'])
@@ -188,6 +193,8 @@ def removeall():
   print("removeall")
   cmd = 'DELETE FROM test'
   g.conn.execute(text(cmd))
+  global message
+  message="Successfully removed all courses!"
   return redirect('/')
 
 
