@@ -183,8 +183,23 @@ def catalog():
 def add():
   name = request.form['name']
   print(name)
-  cmd = 'INSERT INTO test(name) VALUES (:name1), (:name2)'
-  g.conn.execute(text(cmd), name1 = name, name2 = name)
+  cmd = 'INSERT INTO test(name) VALUES (:name1)'
+  g.conn.execute(text(cmd), name1 = name)
+  return redirect('/')
+
+@app.route('/remove', methods=['POST'])
+def remove():
+  name = request.form['name']
+  print(name)
+  cmd = 'DELETE FROM test WHERE name=(:name1)'
+  g.conn.execute(text(cmd), name1 = name)
+  return redirect('/')
+
+@app.route('/removeall', methods=['POST'])
+def removeall():
+  print("removeall")
+  cmd = 'DELETE FROM test'
+  g.conn.execute(text(cmd))
   return redirect('/')
 
 
