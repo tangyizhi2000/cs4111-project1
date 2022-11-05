@@ -9,21 +9,32 @@
 
 
 <body>
-  <a href="catalog.html" class="button">All Courses</a>
-  <h1>Some famous Computer Scientists</h1>
-  <div>{{data}}</div>
 
+  <h1>Course combination finder</h1>
+  <h3>Yizhi Tang, Dongchen Zou</h3>
+  <a href="catalog.html" class="button">All Courses</a>
+  <form method="POST" action="/add">
+  <p>Add call number of a new course: <input type="text" name="name"> <input type="submit" value="Add"></p>
+  </form>
+  <form method="POST" action="/remove">
+  <p>Remove call number of an existing course: <input type="text" name="name"> <input type="submit" value="Remove"></p>
+  </form>
+  <form>
+  <button type=submit formmethod="post" formaction="/removeall">Remove all courses</button>
+  </form>
   <div>
+      {{ msg }}
+  </div>
+  <div>
+    Current sections in schedule:
     {% for n in data %}
     <div>{{n}}</div>
     {% endfor %}
   </div>
+    <div>
 
-<p><a href="/another">Go to the other page</a></p>
+    </div>
 
-<form method="POST" action="/add">
-<p>Name of new computer scientist: <input type="text" name="name"> <input type="submit" value="Add"></p>
-</form>
 
 </body>
 
