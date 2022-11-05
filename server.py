@@ -55,8 +55,9 @@ engine.execute("""CREATE TABLE IF NOT EXISTS test (
 );""")
 engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
 
-message=""
+message = ""
 course_id=[]
+login_user = "Guest"
 
 
 
@@ -241,6 +242,32 @@ def catalog():
   return render_template("catalog.html", **context)
 
 
+@app.route('/login', methods=['POST'])
+def login():
+  global login_user
+  name = request.form['name']
+  # check if it is a log out
+  if name == 'Guest':
+    login_user = name
+    return redirect('/')
+  # Look into student table if the name exits
+  cursor = g.conn.execute(text('SELECT name FROM student WHERE name=(:name1)'), name1 = name)
+  result = cursor.fetchall()
+  cursor.close()
+  if len(result) == 0:# If not exists, create a new user
+    print("NO SUCH USER, CREATE A NEW ONE")
+    cursor = g.conn.execute(text('INSERT INTO student(name) VALUES (:name1)'), name1 = name)
+    cursor.close()
+  else: #if exists, change the login user to login_user
+    login_user = name
+  
+  cursor = g.conn.execute('SELECT * FROM student')
+  for result in cursor:
+    print(result)
+  cursor.close()
+  
+  return redirect('/')
+
 
 @app.route('/add', methods=['POST'])
 def add():
@@ -281,12 +308,12 @@ def removeall():
   message="Successfully removed all courses!"
   return redirect('/')
 
-
+'''
 @app.route('/login')
 def login():
     abort(401)
     this_is_never_executed()
-
+'''
 
 if __name__ == "__main__":
   import click
