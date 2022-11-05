@@ -6,7 +6,21 @@
 </head>
 <body>
 
-Another page, etc
-
+All Courses
+    <div>
+        {% for course in data %}
+        <div>
+            {{course[0][0]}}: {{course[0][1]}}
+            {% for section in course[1] %}
+            <div>
+                <br>&nbsp Call Number: {{section[0]}}</br>
+                <br>&nbsp Course Day: {{section[1]}}</br>
+                <br>&nbsp Course Time: {{section[2]}}</br>
+                <br>&nbsp Instructor: {{section[3]}}</br>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
 </body>
 </html>

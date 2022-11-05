@@ -14,6 +14,7 @@ import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response
+from collections import defaultdict
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -157,14 +158,25 @@ def index():
 #
 # This is an example of a different path.  You can see it at
 #
-#     localhost:8111/another
+#     localhost:8111/catalog
 #
-# notice that the functio name is another() rather than index()
+# notice that the functio name is catalog() rather than index()
 # the functions for each app.route needs to have different names
 #
 @app.route('/catalog.html')
-def another():
-  return render_template("catalog.html")
+def catalog():
+  all_courses = defaultdict(lambda: [])
+  # all sections from a course
+  cursor = g.conn.execute("SELECT * FROM course AS c, section_course as sc WHERE c.course_id = sc.course_id")
+  for result in cursor:
+    course_key = (result['course_id'], result['course_name'])
+    all_courses[course_key].append([result['call_number'], result['section_day'], result['section_time'], result['instructor']])
+    print(result)
+  cursor.close()
+
+  context = dict(data = list(all_courses.items()))
+  print(context)
+  return render_template("catalog.html", **context)
 
 
 # Example of adding new data to the database
