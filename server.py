@@ -15,6 +15,7 @@ from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response
 from collections import defaultdict
+from dateutil.parser import parse
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -61,6 +62,30 @@ login_user = "Guest"
 
 
 
+permutations=[]
+
+
+def check_conflict(day1, time1, day2, time2):
+  if day1 is None or time1 is None or day2 is None or time2 is None:
+    return False
+  conflict = False
+  for d in ['M', 'T', 'W', 'R', 'F']:
+    if d in day1 and d in day2:
+      conflict = True
+      break
+  if not conflict:
+    return False
+  start1, end1 = time1.split('-')
+  start2, end2 = time2.split('-')
+  start1 = parse(start1).time()
+  end1 = parse(end1).time()
+  start2 = parse(start2).time()
+  end2 = parse(end2).time()
+  if end1 < start2 or end2 < start1:
+    conflict = False
+  else:
+    conflict = True
+  return conflict
 
 @app.before_request
 def before_request():
@@ -126,6 +151,25 @@ def index():
     for result in cursor:
       names.append(result[0]+' '+result[1])  # can also be accessed using result[0]
     cursor.close()
+
+  # list=None
+  # for c_id in course_id:
+  #   sections=[]
+  #   cmd="SELECT * FROM course AS c, section_course as sc WHERE c.course_id = sc.course_id AND c.course_id=(:name1)"
+  #   cursor=g.conn.execute(text(cmd), name1=c_id)
+  #   for result in cursor:
+  #     sections.append([[course_id,result['course_name'],result['call_number'],result['section_day'],result['section_time'],result['instructor']]])
+  #   if list is None:
+  #     list=sections
+  #   else:
+  #     newlist=[]
+  #     for l in list:
+  #       hasmatch=false
+  #       for s in sections:
+  #
+  #         for ll in l:
+  #           if
+
 
   #
   # Flask uses Jinja templates, which is an extension to HTML where you can
