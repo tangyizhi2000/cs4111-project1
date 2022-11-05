@@ -58,12 +58,10 @@ engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'
 
 message = ""
 course_id=[]
-<<<<<<< Updated upstream
 login_user = "Guest"
 
 
 
-=======
 permutations=[]
 
 
@@ -88,7 +86,6 @@ def check_conflict(day1, time1, day2, time2):
   else:
     conflict = True
   return conflict
->>>>>>> Stashed changes
 
 @app.before_request
 def before_request():
