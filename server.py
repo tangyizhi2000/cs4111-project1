@@ -207,24 +207,18 @@ def index():
   return render_template("index.html", **context)
 
 def parse_time(section_time):
-  section_time = section_time.split('-')
-  start_time = section_time[0][:-2].split(':')
-  end_time = section_time[1][:-2].split(':')
-  start_hour = int(start_time[0]) - 8
-  if start_hour < 0:
-    start_hour += 12
-  start_min = int(start_time[1])
-  end_hour = int(end_time[0]) - 8
-  if end_hour < 0:
-    end_hour += 12
-  end_min = int(end_time[1])
-  time_slot_start = start_hour * 2
-  time_slot_end = end_hour * 2
-  if start_min > 30:
-    time_slot_start += 1
-  if end_min > 0:
-    time_slot_end += 1
-  return (time_slot_start, time_slot_end)
+  start, end = section_time.split('-')
+  start = str(parse(start).time()).split(':')
+  end = str(parse(end).time()).split(':')
+  start_slot = (int(start[0]) - 8) * 2
+  if int(start[1]) >= 30:
+    start_slot += 1
+  end_slot = (int(end[0]) - 8) * 2
+  if int(end[1]) > 0:
+    end_slot += 1
+
+  print(start_slot, end_slot)
+  return (start_slot, end_slot)
 
 def format_schedule(sections):
   # longest Course name
@@ -238,7 +232,7 @@ def format_schedule(sections):
   # a schedule placeholder
   MondayToFriday = [[], [], [], [], []]
   for i in range(len(MondayToFriday)):
-    for half_hour in range(0, 24):
+    for half_hour in range(0, 25):
       MondayToFriday[i].append(div_line)
   # mapping from MTWRF to 012345
   MTWRF_mapping = {'M': 0, 'T': 1, 'W': 2, 'R': 3, 'F': 4}
@@ -250,19 +244,30 @@ def format_schedule(sections):
     for weekday in section['section_day']:
       for i in range(start_slot, end_slot):
         space_line = section['course_name']
-        for i in range(len(section['course_name']), longest_course_name):
+        for _ in range(len(section['course_name']), longest_course_name):
           space_line += ' '
         print(i, section)
         MondayToFriday[MTWRF_mapping[weekday]][i] = space_line
   # string formatting
+  ret_string = ""
   for i in range(len(MondayToFriday[0])):
-    time_slot = " | "
+    cur_time = str(int(i/2)+8)
+    if len(cur_time) == 1:
+      cur_time = '0' + cur_time
+    cur_time += ":"
+    if i % 2 == 0:
+      cur_time += '00'
+    else:
+      cur_time += '30'
+    time_slot = cur_time + "| "
     for j in range(len(MondayToFriday)):
       time_slot += str(MondayToFriday[j][i]) + " | "
-    print(time_slot)
+    ret_string += (time_slot + '\n')
       
   print(section)
   print(MondayToFriday)
+  print(ret_string)
+  return ret_string
 
 #
 # This is an example of a different path.  You can see it at
