@@ -58,6 +58,9 @@ engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'
 message=""
 course_id=[]
 
+
+
+
 @app.before_request
 def before_request():
   """
@@ -187,13 +190,17 @@ def catalog():
 def add():
   name = request.form['name']
   print(name)
+  global message
+  if name in course_id:
+    message=name+" is already in schedule!"
+    return redirect('/')
+
   cmd = 'SELECT * FROM course WHERE course_id=(:name1)'
   cursor = g.conn.execute(text(cmd), name1 = name)
   cname=''
   for result in cursor:
     cname=result['course_id']
     break
-  global message
   if cname=='':
     message="The course "+name+" does not exist!"
   else:
