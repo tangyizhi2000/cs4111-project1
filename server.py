@@ -159,6 +159,11 @@ def index():
     cursor=g.conn.execute(text(cmd), name1=c_id)
     for result in cursor:
       sections.append([[c_id,result['course_name'],result['call_number'],result['section_day'],result['section_time'],result['instructor']]])
+    for section in sections:
+      cmd='SELECT term_name FROM section_term WHERE call_number=(:name1)'
+      cursor=g.conn.execute(text(cmd), name1=section[0][2])
+      for result in cursor:
+        section[0].append(result[0])
     if list is None:
       list=sections
     else:
@@ -167,7 +172,7 @@ def index():
         for s in sections:
           match=True
           for ll in l:
-            if check_conflict(s[0][3],s[0][4],ll[3],ll[4]):
+            if check_conflict(s[0][3],s[0][4],ll[3],ll[4]) or s[0][6]!=ll[6]:
               match=False
               break
           if match:
@@ -290,9 +295,9 @@ def format_schedule(sections):
       time_slot += str(MondayToFriday[j][i]) + " | "
     ret_string += (time_slot + '\n')
       
-  print(section)
-  print(MondayToFriday)
-  print(ret_string)
+  #print(section)
+  #print(MondayToFriday)
+  #print(ret_string)
   return ret_string
 
 #
