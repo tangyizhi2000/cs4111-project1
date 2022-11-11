@@ -164,6 +164,12 @@ def index():
       cursor=g.conn.execute(text(cmd), name1=section[0][2])
       for result in cursor:
         section[0].append(result[0])
+      cmd='SELECT exam_date FROM exam WHERE call_number=(:name1)'
+      cursor=g.conn.execute(text(cmd),name1=section[0][2])
+      exams=[]
+      for result in cursor:
+        exams.append(result[0])
+      section[0].append(exams)
     if list is None:
       list=sections
     else:
@@ -192,6 +198,7 @@ def index():
         sec_dict['course_name']=section[1]
         sec_dict['section_day']=section[3]
         sec_dict['section_time']=section[4]
+        sec_dict['exam_dates']=section[7]
         l.append(sec_dict)
       visual=format_schedule(l)
       list_visulized.append(visual)
@@ -229,7 +236,7 @@ def index():
     list=[]
   elif len(list)==0:
     message="No permutation exist!"
-  context = dict(msg = message,data = names,list=list_visulized)
+  context = dict(name=login_user, msg = message,data = names,list=list_visulized)
   message=""
   #
   # render_template looks in the templates/ folder for files.
@@ -294,7 +301,17 @@ def format_schedule(sections):
     for j in range(len(MondayToFriday)):
       time_slot += str(MondayToFriday[j][i]) + " | "
     ret_string += (time_slot + '\n')
-      
+
+  for i in range(len(sections)):
+    for j in range(len(sections)):
+      if j<=i:
+        continue
+      exam1=sections[i]['exam_dates']
+      exam2=sections[j]['exam_dates']
+      for e1 in exam1:
+        for e2 in exam2:
+          if e1==e2:
+            ret_string+="WARNING: "+sections[i]['course_name']+" and "+sections[j]['course_name']+" both have an exam on "+e1+"\n"
   #print(section)
   #print(MondayToFriday)
   #print(ret_string)
@@ -373,7 +390,6 @@ def add():
   if name in course_id:
     message=name+" is already in schedule!"
     return redirect('/')
-
   cmd = 'SELECT * FROM course WHERE course_id=(:name1)'
   cursor = g.conn.execute(text(cmd), name1 = name)
   cname=''
