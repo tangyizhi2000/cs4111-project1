@@ -140,6 +140,21 @@ def index():
   # DEBUG: this is debugging code to see what request looks like
   print(request.args)
 
+  saved=[]
+  if login_user!='Guest':
+    cmd='SELECT sid FROM schedule_student WHERE name=(:name1)'
+    cursor=g.conn.execute(text(cmd),name1=login_user)
+    sids=[]
+    for result in cursor:
+      sids.append(int(result[0]))
+    for sid in sids:
+      alist=[]
+      cmd = 'SELECT call_number FROM schedule_section WHERE sid=(:name1)'
+      cursor=g.conn.execute(text(cmd),name1=sid)
+      for result in cursor:
+        alist.append(result[0])
+      saved.append(alist)
+
 
   #
   # example of a database query
@@ -152,6 +167,7 @@ def index():
       names.append(result[0]+' '+result[1])  # can also be accessed using result[0]
     cursor.close()
 
+  permutations=[]
   list=None
   for c_id in course_id:
     sections=[]
@@ -189,7 +205,18 @@ def index():
             newlist.append(new_set)
       list=newlist
   print(list)
+  if list is not None and len(list)>0:
+    for schedule in list:
+      perm1=[]
+      perm1.append(schedule[0][6])
+      perm2=[]
+      for section in schedule:
+        perm2.append(section[2])
+      perm1.append(perm2)
+      permutations.append(perm1)
+
   list_visulized=[]
+
   if list is not None and len(list)>0:
     for schedule in list:
       l=[]
@@ -236,7 +263,7 @@ def index():
     list=[]
   elif len(list)==0:
     message="No permutation exist!"
-  context = dict(name=login_user, msg = message,data = names,list=list_visulized)
+  context = dict(saved_schedule=saved, name=login_user, msg = message,data = names,list=list_visulized)
   message=""
   #
   # render_template looks in the templates/ folder for files.
