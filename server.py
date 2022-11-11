@@ -167,6 +167,7 @@ def index():
       names.append(result[0]+' '+result[1])  # can also be accessed using result[0]
     cursor.close()
 
+  global permutations
   permutations=[]
   list=None
   for c_id in course_id:
