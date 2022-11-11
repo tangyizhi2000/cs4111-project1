@@ -440,6 +440,16 @@ def remove():
   message="Successfully removed "+name+" from schedule!"
   return redirect('/')
 
+@app.route('/save', methods=['POST'])
+def remove():
+  name = request.form['name']
+  lst = name.split(',')
+  for schedule_id in lst:
+    if schedule_id >= len(permutations):
+      continue
+    permutations[schedule_id]
+  return redirect('/')
+
 @app.route('/removeall', methods=['POST'])
 def removeall():
   print("removeall")
