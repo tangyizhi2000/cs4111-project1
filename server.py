@@ -332,6 +332,11 @@ def catalog():
 def login():
   global login_user
   name = request.form['name']
+  # check if name valid
+  for letter in name:
+    if not (letter == ' ' or letter.isalnum()):
+      name = 'Guest'
+      return redirect('/')
   # check if it is a log out
   if name == 'Guest':
     login_user = name
