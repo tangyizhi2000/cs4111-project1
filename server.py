@@ -447,11 +447,13 @@ def remove():
 @app.route('/save', methods=['POST'])
 def save():
   name = request.form['name']
-  lst = name.split(',')
-  for schedule_id in lst:
-    if schedule_id >= len(permutations):
-      continue
-    permutations[schedule_id]
+  if name.isnumeric() == False or int(name) >= len(permutations):
+    global message
+    message = "Not a number, Or Index out of range"
+    return redirect('/')
+  idx = int(name)
+
+  print("!!!", permutations, course_id, idx)
   return redirect('/')
 
 @app.route('/removeall', methods=['POST'])
