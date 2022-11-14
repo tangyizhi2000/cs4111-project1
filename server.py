@@ -142,15 +142,15 @@ def index():
 
   saved=[]
   if login_user!='Guest':
-    cmd='SELECT sid FROM schedule_student WHERE name=(:name1)'
+    cmd='SELECT sid,term_name FROM schedule_student WHERE name=(:name1)'
     cursor=g.conn.execute(text(cmd),name1=login_user)
     sids=[]
     for result in cursor:
-      sids.append(int(result[0]))
+      sids.append([int(result[0]),result[1]])
     for sid in sids:
-      alist=[]
+      alist=[sid[1]]
       cmd = 'SELECT call_number FROM schedule_section WHERE sid=(:name1)'
-      cursor=g.conn.execute(text(cmd),name1=sid)
+      cursor=g.conn.execute(text(cmd),name1=sid[0])
       for result in cursor:
         alist.append(result[0])
       saved.append(alist)
@@ -218,6 +218,8 @@ def index():
 
   list_visulized=[]
 
+
+  idx=0
   if list is not None and len(list)>0:
     for schedule in list:
       l=[]
@@ -229,6 +231,8 @@ def index():
         sec_dict['exam_dates']=section[7]
         l.append(sec_dict)
       visual=format_schedule(l)
+      visual="Permutation index "+str(idx)+":\n"+visual
+      idx+=1
       list_visulized.append(visual)
 
 
