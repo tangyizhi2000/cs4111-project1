@@ -440,6 +440,7 @@ def remove():
   message="Successfully removed "+name+" from schedule!"
   return redirect('/')
 
+
 @app.route('/save', methods=['POST'])
 def save():
   name = request.form['name']
@@ -447,10 +448,38 @@ def save():
     global message
     message = "Not a number, Or Index out of range"
     return redirect('/')
-  idx = int(name)
-
-  print("!!!", permutations, course_id, idx)
+  
+  if login_user == "Guest":
+  	message = "Please log in"
+  else:
+  	# information we needed to insert values
+    idx = int(name)
+    term = permutations[idx][0]
+    call_number = permutations[idx][1]
+    # insert into schedule_student table and get sid
+    cursor = g.conn.execute('INSERT INTO schedule_student(name, term_name) VALUES (%s, %s)', (login_user, term))
+    sid_serial = '''
+      SELECT LASTVAL();
+    '''
+    cursor = g.conn.execute(sid_serial)
+    for c in cursor:
+      sid_serial = c[0]
+      break
+    # insert each call number into schedule_section
+    for cn in call_number:
+      g.conn.execute('INSERT INTO schedule_section(sid, call_number) VALUES (%s, %s)', (sid_serial, cn))
+    check = '''
+    SELECT * FROM schedule_section 
+    '''
+    cursor = g.conn.execute(check)
+    for c in cursor:
+      print(c)
+  # text('INSERT INTO student(name) VALUES (:name1)'), name1 = name
+  query = '''
+  INSERT INTO schedule_section(sid, call_number)
+  '''
   return redirect('/')
+
 
 @app.route('/removeall', methods=['POST'])
 def removeall():
