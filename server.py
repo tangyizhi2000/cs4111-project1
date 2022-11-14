@@ -179,8 +179,12 @@ def index():
     for section in sections:
       cmd='SELECT term_name FROM section_term WHERE call_number=(:name1)'
       cursor=g.conn.execute(text(cmd), name1=section[0][2])
+      has_term=false
       for result in cursor:
+        has_term=true
         section[0].append(result[0])
+      if not has_term:
+        section[0].append('')
       cmd='SELECT exam_date FROM exam WHERE call_number=(:name1)'
       cursor=g.conn.execute(text(cmd),name1=section[0][2])
       exams=[]
@@ -228,7 +232,10 @@ def index():
         sec_dict['course_name']=section[1]
         sec_dict['section_day']=section[3]
         sec_dict['section_time']=section[4]
-        sec_dict['exam_dates']=section[7]
+        if (len(section)>7):
+          sec_dict['exam_dates']=section[7]
+        else:
+          sec_dict['exam_dates']=[]
         l.append(sec_dict)
       visual=format_schedule(l)
       visual="Permutation index "+str(idx)+":\n"+visual
