@@ -422,6 +422,10 @@ def add():
   if name in course_id:
     message=name+" is already in schedule!"
     return redirect('/')
+  for c in name:
+    if not (c==' ' or c.isalnum()):
+      message=name+" is invalid!"
+      return redirect('/')
   cmd = 'SELECT * FROM course WHERE course_id=(:name1)'
   cursor = g.conn.execute(text(cmd), name1 = name)
   cname=''
