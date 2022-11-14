@@ -385,7 +385,7 @@ def catalog():
   for result in cursor:
     sections.append(result)
   cursor.close()
-  format_schedule(sections)
+  #format_schedule(sections)
   return render_template("catalog.html", **context)
 
 
